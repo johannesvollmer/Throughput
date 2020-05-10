@@ -30,9 +30,11 @@ import json
 import string
 import numpy as np
 
+
 str_to_num = {}
 for i,j in enumerate(string.ascii_lowercase[:26]):
     str_to_num[j] = i
+
 str_to_num[' '] = 26
 str_to_num['0'] = 27 #'0' represents null character
 
@@ -44,14 +46,11 @@ char_freq = np.array([0.06545420428810268, 0.012614349400134882, 0.0223820796607
             0.022804128240333354, 0.007977317166161044, 0.017073508770571122, 0.0014120607927983009, 0.014305632773116854,\
             0.0005138874382474097, 0.18325568938199557])
 
+
 class Throughput(object):
     """Class for Throughput"""
-    def __init__(self, filename):
-        self.filename = filename
-        try:
-            self.json = json.load(open(filename))
-        except Exception as e:
-            raise "can not find the json file"
+    def __init__(self, data):
+        
         # Instances of each transcription trial data
         self.trials = []
         
@@ -68,10 +67,14 @@ class Throughput(object):
 
         translator = str.maketrans('', '', string.punctuation+'1234567890\n')
         # read data from the file
-        for item in self.json:
+        for item in data:
             #[P, T, time] #time unit: second
             self.trials.append([item["Present"].lower().translate(translator), item["Transcribe"].lower().translate(translator), \
                                 (item["Time"]) / 1000.0])
+
+        self.throughput = self.calThroughput()
+        self.uncorrectedErrRate = (self.totalINF / (self.totalINF + self.totalC))
+        self.wpm = 12*self.cps
 
     '''Function for calculating the transmission probability table (P(i,j))'''
     def calErrorTable(self):
